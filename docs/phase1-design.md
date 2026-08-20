@@ -116,20 +116,28 @@ Claude API（画像解析・アドバイス生成、サーバー側からのみ�
 | created_at / updated_at | timestamptz | default now() | |
 
 ### body_compositions
+共有いただいた実際のアプリ画面（体重／BMI／体脂肪率／骨格筋率／筋肉量／タンパク質率／基礎代謝量／除脂肪体重／皮下脂肪率／内臓脂肪レベル／体水分率／骨量／体型／体内年齢の14項目）に合わせて列を確定。今後さらに機種を変えても `extra_metrics`(jsonb) で項目を追加できます。
+
 | 列 | 型 | 制約 | 説明 |
 |---|---|---|---|
 | id | uuid | PK | |
 | user_id | uuid | FK, NOT NULL | |
-| measured_at | timestamptz | NOT NULL | |
-| weight_kg | numeric(5,2) | CHECK > 0 | |
-| bmi | numeric(4,1) | NULLABLE | |
-| body_fat_percent | numeric(4,1) | NULLABLE | |
-| muscle_mass_kg | numeric(5,2) | NULLABLE | |
-| skeletal_muscle_percent | numeric(4,1) | NULLABLE | |
-| basal_metabolism_kcal | integer | NULLABLE | |
-| visceral_fat_level | numeric(4,1) | NULLABLE | |
-| body_water_percent | numeric(4,1) | NULLABLE | |
-| extra_metrics | jsonb | default '{}' | 機種固有の追加項目 |
+| measured_at | timestamptz | NOT NULL | 測定日時 |
+| weight_kg | numeric(5,2) | CHECK > 0 | 体重 |
+| bmi | numeric(4,1) | NULLABLE | BMI |
+| body_fat_percent | numeric(4,1) | NULLABLE | 体脂肪率 |
+| skeletal_muscle_percent | numeric(4,1) | NULLABLE | 骨格筋率 |
+| muscle_mass_kg | numeric(5,2) | NULLABLE | 筋肉量 |
+| protein_percent | numeric(4,1) | NULLABLE | タンパク質率 |
+| basal_metabolism_kcal | integer | NULLABLE | 基礎代謝量 |
+| lean_body_mass_kg | numeric(5,2) | NULLABLE | 除脂肪体重 |
+| subcutaneous_fat_percent | numeric(4,1) | NULLABLE | 皮下脂肪率 |
+| visceral_fat_level | numeric(4,1) | NULLABLE | 内臓脂肪レベル |
+| body_water_percent | numeric(4,1) | NULLABLE | 体水分率 |
+| bone_mass_kg | numeric(4,2) | NULLABLE | 骨量 |
+| body_type_label | text | NULLABLE | 体型判定（例：標準、重度の肥満） |
+| body_age | integer | NULLABLE | 体内年齢 |
+| extra_metrics | jsonb | default '{}' | 上記以外の機種固有項目の拡張余地 |
 | source | text | CHECK IN ('ai_scan','manual') | |
 | created_at | timestamptz | default now() | |
 
@@ -349,6 +357,49 @@ Web版（カラーパレット・タイポグラフィ・ワイヤーフレー�
 5. **公開ドメイン** — 当面は `*.vercel.app` を推奨
 6. **Rate Limit基盤** — Upstash Redis（無料枠）の利用を推奨、外部サービス登録の可否をご確認ください
 7. **アプリ名・アイコン** — 本書では仮称「ふたり健康管理」を使用。正式名称・アイコンの希望があれば教えてください
+
+---
+
+## 14. 最終確定仕様（Phase 2移行前 確認用）
+
+12節の要判断事項へのご回答をすべて反映した最終仕様です。
+
+**AI API — Claude一本化 + 疎結合設計:** 体組成解析・食事解析・日次アドバイス・週次レビューのすべてをClaude APIで実装。将来の差し替えに備え、AI呼び出しは共通インターフェース（`AIProvider`）越しにのみ行い、Claude固有の実装（プロンプト・APIクライアント）は`ClaudeProvider`の中に閉じ込めます。呼び出し側は`AIProvider`型だけを参照し、差し替え時はインスタンス生成箇所（ファクトリ関数1箇所）のみ変更すればよい設計とします。具体的なモデル名はPhase 4実装時に確定し、環境変数で切替可能にします。
+
+**体組成スクリーンショット項目 — 確定:** 共有いただいたスクリーンショットの14項目をそのまま`body_compositions`の列として確定（5節参照）。
+
+**2アカウントの発行方法 — 確定:**
+1. Supabase Authダッシュボードから管理者が「本人」「夫」のメールアドレス＋パスワードで2アカウントを直接作成（新規登録フォームは作らない）
+2. 同じ2件のメールアドレスを`allowed_users`テーブルに事前登録
+3. ログイン方式はメールアドレス＋パスワード認証
+
+**夫アカウントの生理データ — 完全分離の確定設計:**
+- **DB／RLS**：`menstrual_cycles`は「auth.uid() = user_id」のみで行を返すため、夫のセッションが妻の行を問い合わせても結果は0件。空データベースと見分けがつかない
+- **API**：生理関連のAPI Routeは他ユーザーのuser_idを受け取れる設計にしない（常にセッションのuser_idのみ使用）。夫のアカウントではUI・ルーティング自体からこれらの画面を除外する
+- **AI処理**：`profiles.menstrual_tracking_enabled = false`のユーザーには、日次／週次アドバイス生成時に`menstrual_cycles`への問い合わせ自体を行わない（存在の推測材料となるレスポンス差異を作らない）
+- **ログ／エラー**：生理関連の値はエラーログ・監視ツールに一切出力しない
+
+**Rate Limit — Upstash Redis事前確認:**
+| 確認項目 | 内容 |
+|---|---|
+| 何に使うか | AI呼び出しを伴うAPI（画像解析・食事解析・アドバイス生成）等への、ユーザーごとのリクエスト回数制限 |
+| 無料枠での運用可否 | 2名のみの利用で1日の操作は多くても数十件程度のため無料枠で十分運用可能。Phase 2のアカウント作成時に実際の条件を確認 |
+| 送信・保存するデータ | 「識別子（ユーザーのuuid＋API名）」と「アクセス回数・タイムスタンプ」のみ |
+| 個人情報の非保存 | 体重・体脂肪率・食事内容・生理日など実データは一切送信しない。リクエスト本文もUpstashには渡さない |
+
+**公開ドメイン・アプリ名 — 確定:** 当面は`*.vercel.app`を使用し、独自ドメインは完成後に検討。アプリ名・アイコンはコードにハードコードせず、Manifest／設定用の定数ファイル1箇所にまとめてロジックから分離します。
+
+### 最終仕様サマリー
+
+| 項目 | 最終仕様 |
+|---|---|
+| 認証 | Supabase Auth（メール＋パスワード）。管理者が2アカウントを手動発行。新規登録フォームなし |
+| allowlist | `allowed_users`に2件のメールアドレスのみ登録。ミドルウェアで毎リクエスト確認 |
+| RLS | 全テーブルで有効化。「auth.uid() = user_id かつ allowlist登録済み」の二重条件（SELECT/INSERT/UPDATE/DELETE） |
+| 夫婦間のデータ分離 | 体組成・目標・食事・AIアドバイス・週次レビュー・設定はすべてuser_idでRLS分離。相手の行は一切取得不可 |
+| 生理データの完全分離 | DB（RLS）・API（他user_id受け取り不可）・AI（フラグOFF時は問い合わせ自体をしない）・ログの4層で遮断。存在の推測も防止 |
+| AIへのデータ送信範囲 | ログイン中の本人のデータのみ。プロンプト生成関数はセッションのuser_idからのみデータ取得。プロンプト・レスポンス全文は永続ログに残さない |
+| Rate Limit | Upstash Redis。識別子＋回数のみ送信、個人データ（体重・食事・生理等）は送信・保存しない |
 
 ---
 
