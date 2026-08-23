@@ -11,7 +11,16 @@ import { AdviceRefreshButton } from "./advice-refresh-button";
 export async function AdviceCard() {
   const user = await requireAllowedUser();
   const profile = await getOrCreateProfile(user.id, user.email);
-  const advice = await getOrGenerateDailyAdvice(user.id, profile.display_name);
+
+  let advice;
+  try {
+    advice = await getOrGenerateDailyAdvice(user.id, profile.display_name);
+  } catch (error) {
+    // AIアドバイス生成に失敗しても、ホーム画面全体を壊さない。
+    // (体組成・目標などの他の情報は問題なく見られる状態を保つ)
+    console.error("daily advice generation failed", error instanceof Error ? error.message : error);
+    return null;
+  }
 
   if (!advice) return null;
 
