@@ -14,9 +14,17 @@ const PUBLIC_PATHS = ["/login"];
  *   requireAllowedUser()（src/lib/auth/require-allowed-user.ts）
  * - Supabase RLS（最終防御層、DB側で独立して再判定）
  * の2箇所で、こことは独立に必ず再確認される。
+ *
+ * nonceはCSPヘッダー用に生成されたものをそのままリクエストヘッダーにも
+ * 転送し、Server Component側から必要になった場合に参照できるようにする。
  */
-export async function updateSession(request: NextRequest) {
-  let response = NextResponse.next({ request });
+export async function updateSession(request: NextRequest, nonce: string) {
+  const forwardedHeaders = new Headers(request.headers);
+  forwardedHeaders.set("x-nonce", nonce);
+
+  let response = NextResponse.next({
+    request: { headers: forwardedHeaders },
+  });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -30,7 +38,9 @@ export async function updateSession(request: NextRequest) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value),
           );
-          response = NextResponse.next({ request });
+          response = NextResponse.next({
+            request: { headers: forwardedHeaders },
+          });
           cookiesToSet.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options),
           );
