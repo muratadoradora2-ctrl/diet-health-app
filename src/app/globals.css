@@ -219,6 +219,16 @@ h3 {
   margin-bottom: 12px;
 }
 
+.callout-ai {
+  background: var(--accent-tint);
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  font-size: 0.88rem;
+  color: var(--accent-strong);
+}
+
 /* --- ホーム/数値表示 --- */
 
 .hero-card {

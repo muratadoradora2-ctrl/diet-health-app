@@ -14,6 +14,7 @@ const numField = z.preprocess(
 const schema = z.object({
   measuredDate: z.string().min(1),
   measuredTime: z.string().min(1),
+  source: z.enum(["manual", "ai_scan"]),
   weightKg: z.preprocess((v) => Number(v), z.number().positive().max(400)),
   bmi: numField,
   bodyFatPercent: numField,
@@ -41,6 +42,7 @@ export async function createBodyComposition(
   const parsed = schema.safeParse({
     measuredDate: formData.get("measuredDate"),
     measuredTime: formData.get("measuredTime"),
+    source: formData.get("source"),
     weightKg: formData.get("weightKg"),
     bmi: formData.get("bmi"),
     bodyFatPercent: formData.get("bodyFatPercent"),
@@ -61,11 +63,12 @@ export async function createBodyComposition(
     return { error: "入力内容を確認してください。体重は必須です。" };
   }
 
-  const { measuredDate, measuredTime, bodyTypeLabel, ...rest } = parsed.data;
+  const { measuredDate, measuredTime, source, bodyTypeLabel, ...rest } = parsed.data;
 
   try {
     await insertBodyComposition(user.id, {
       measuredAt: jstDateTimeToISOString(measuredDate, measuredTime),
+      source,
       weightKg: rest.weightKg,
       bmi: rest.bmi ?? null,
       bodyFatPercent: rest.bodyFatPercent ?? null,

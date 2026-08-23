@@ -25,6 +25,7 @@ export async function listBodyCompositions(
 export type BodyCompositionInput = {
   measuredAt: string;
   weightKg: number;
+  source: "manual" | "ai_scan";
   bmi?: number | null;
   bodyFatPercent?: number | null;
   skeletalMusclePercent?: number | null;
@@ -62,7 +63,7 @@ export async function insertBodyComposition(
     bone_mass_kg: input.boneMassKg ?? null,
     body_type_label: input.bodyTypeLabel ?? null,
     body_age: input.bodyAge ?? null,
-    source: "manual",
+    source: input.source,
   });
 
   if (error) throw new Error("体組成の登録に失敗しました");
