@@ -23,4 +23,7 @@ export type {
   DailyAdviceResult,
   ImageInput,
   MealNutritionDraft,
+  WeeklyReview,
+  WeeklyReviewContext,
+  WeeklyReviewResult,
 } from "./provider";

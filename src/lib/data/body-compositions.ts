@@ -22,6 +22,24 @@ export async function listBodyCompositions(
   return data ?? [];
 }
 
+export async function listBodyCompositionsBetween(
+  userId: string,
+  startIso: string,
+  endIso: string,
+): Promise<BodyComposition[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("body_compositions")
+    .select("*")
+    .eq("user_id", userId)
+    .gte("measured_at", startIso)
+    .lt("measured_at", endIso)
+    .order("measured_at", { ascending: true });
+
+  if (error) throw new Error("体組成データの取得に失敗しました");
+  return data ?? [];
+}
+
 export type BodyCompositionInput = {
   measuredAt: string;
   weightKg: number;

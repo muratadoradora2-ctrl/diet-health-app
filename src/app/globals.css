@@ -326,6 +326,38 @@ h3 {
   color: var(--ink-soft);
 }
 
+/* --- 週次AIレビュー --- */
+
+.review-subheading {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  margin: 12px 0 8px;
+}
+
+.review-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.review-list-item {
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.review-list-item:first-child {
+  padding-top: 0;
+  border-top: none;
+}
+
+.review-week-range {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
 /* --- ホーム/数値表示 --- */
 
 .hero-card {

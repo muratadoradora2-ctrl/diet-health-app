@@ -75,9 +75,46 @@ export type DailyAdviceResult = {
   modelUsed: string;
 };
 
+/** 週次AIレビュー生成に渡す、直近の「完了した週」(月〜日)のまとめ */
+export type WeeklyReviewContext = {
+  displayName: string;
+  weekStartDate: string;
+  weekEndDate: string;
+  weightStartKg: number | null;
+  weightEndKg: number | null;
+  weightChangeKg: number | null;
+  avgWeightKg: number | null;
+  /** その週のうち、体組成を記録した日数(0〜7) */
+  daysWithBodyCompLog: number;
+  goal: {
+    startWeightKg: number;
+    targetWeightKg: number;
+    targetDate: string | null;
+  } | null;
+  avgCaloriesKcal: number | null;
+  /** その週のうち、食事を1件以上記録した日数(0〜7) */
+  daysWithMealLog: number;
+  totalMealsLogged: number;
+};
+
+export type WeeklyReview = {
+  /** その週の総括(3〜5文程度) */
+  summary: string;
+  /** 良かった点(1〜3件) */
+  goodPoints: string[];
+  /** 来週に向けて(1〜3件) */
+  focusNextWeek: string[];
+};
+
+export type WeeklyReviewResult = {
+  review: WeeklyReview;
+  modelUsed: string;
+};
+
 export interface AIProvider {
   analyzeBodyCompositionImage(image: ImageInput): Promise<BodyCompositionDraft>;
   analyzeMealFromText(text: string): Promise<MealNutritionDraft>;
   analyzeMealFromImage(image: ImageInput): Promise<MealNutritionDraft>;
   generateDailyAdvice(context: DailyAdviceContext): Promise<DailyAdviceResult>;
+  generateWeeklyReview(context: WeeklyReviewContext): Promise<WeeklyReviewResult>;
 }

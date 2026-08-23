@@ -51,6 +51,30 @@ export function formatJstDateTime(iso: string, options: Intl.DateTimeFormatOptio
  * タイムゾーンの影響を受けないよう、Dateオブジェクトのローカルコンストラクタで
  * 組み立ててからtimeZone指定なしでフォーマットする(値が往復して一致する)。
  */
+/**
+ * 直近の「完了した週」(月曜始まり、日曜終わり)をJST基準で返す。
+ * 今週はまだ終わっていないため、常に先週(月〜日)を指す。
+ */
+export function jstMostRecentCompletedWeek(referenceDate: Date = new Date()): {
+  startDate: string;
+  endDate: string;
+} {
+  const jst = toJst(referenceDate);
+  const dayOfWeek = jst.getDay(); // 0=日, 1=月, ..., 6=土
+  const daysSinceMonday = (dayOfWeek + 6) % 7;
+
+  const thisMonday = new Date(jst);
+  thisMonday.setDate(thisMonday.getDate() - daysSinceMonday);
+
+  const lastMonday = new Date(thisMonday);
+  lastMonday.setDate(lastMonday.getDate() - 7);
+  const lastSunday = new Date(lastMonday);
+  lastSunday.setDate(lastSunday.getDate() + 6);
+
+  const toYmd = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  return { startDate: toYmd(lastMonday), endDate: toYmd(lastSunday) };
+}
+
 export function formatDateOnly(
   dateStr: string,
   options: Intl.DateTimeFormatOptions = { month: "numeric", day: "numeric" },

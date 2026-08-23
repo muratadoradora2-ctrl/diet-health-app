@@ -10,12 +10,16 @@ import type {
   DailyAdviceResult,
   ImageInput,
   MealNutritionDraft,
+  WeeklyReview,
+  WeeklyReviewContext,
+  WeeklyReviewResult,
 } from "./provider";
 
 // コスト・精度のバランスはPhase 4実装時に環境変数で切替可能にする(Phase 1合意事項)。
 const BODY_SCAN_MODEL = process.env.AI_BODY_SCAN_MODEL || "claude-opus-5";
 const MEAL_ANALYSIS_MODEL = process.env.AI_MEAL_ANALYSIS_MODEL || "claude-opus-5";
 const DAILY_ADVICE_MODEL = process.env.AI_DAILY_ADVICE_MODEL || "claude-opus-5";
+const WEEKLY_REVIEW_MODEL = process.env.AI_WEEKLY_REVIEW_MODEL || "claude-opus-5";
 
 const BodyCompositionDraftSchema = z.object({
   weightKg: z.number().nullable().describe("体重(kg)"),
@@ -138,6 +142,73 @@ function formatContextForPrompt(context: DailyAdviceContext): string {
     }
   } else {
     lines.push("本日記録済みの食事: なし");
+  }
+
+  return lines.join("\n");
+}
+
+const WeeklyReviewSchema = z.object({
+  summary: z.string().describe("その週全体の総括。3〜5文程度"),
+  goodPoints: z
+    .array(z.string())
+    .min(1)
+    .max(3)
+    .describe("その週で良かった点。1〜3件、それぞれ1文程度"),
+  focusNextWeek: z
+    .array(z.string())
+    .min(1)
+    .max(3)
+    .describe("来週に向けて意識するとよいこと。1〜3件、それぞれ1文程度"),
+});
+
+/**
+ * 日次アドバイスと同じ安全性の制約に加え、週次レビューならではの方針:
+ *   - 1週間という単位そのものが「短期の増減に振り回されない」ための区切りなので、
+ *     week単位の記録の一貫性・習慣そのものを評価の中心に置く
+ *   - 記録が少ない/欠けている週でも、責めるような表現をしない
+ */
+const WEEKLY_REVIEW_SYSTEM_PROMPT = `あなたは、夫婦2人のためのダイエット・健康管理アプリの中で、
+1週間(月曜〜日曜)の体組成・食事記録をもとに振り返りレビューを生成するアシスタントです。
+
+必ず守るルール:
+- 極端な食事制限、断食、欠食、過度な運動、急激な減量は絶対に勧めない。
+- 医療行為の代替となるような診断・処方に類する助言は行わない。
+- その週の体重の増減だけで評価せず、記録の継続・生活リズムなど習慣面も含めて
+  holisticに(全体的に)評価する。
+- 記録が少ない、または体重が増えた週であっても、責めるような書き方をせず、
+  次につながる前向きな振り返りにする。
+- 断定的な表現を避け、あくまで参考情報であることが伝わる書き方にする。
+- 提供された数値データの範囲内で助言し、存在しないデータを創作しない。`;
+
+function formatWeeklyContextForPrompt(context: WeeklyReviewContext): string {
+  const lines: string[] = [];
+  lines.push(`利用者名: ${context.displayName}`);
+  lines.push(`対象期間: ${context.weekStartDate} 〜 ${context.weekEndDate}`);
+  lines.push(`体組成記録日数: ${context.daysWithBodyCompLog}/7日`);
+
+  if (context.weightStartKg !== null && context.weightEndKg !== null) {
+    lines.push(
+      `週の体重推移: ${context.weightStartKg}kg → ${context.weightEndKg}kg` +
+        (context.weightChangeKg !== null
+          ? `(変化: ${context.weightChangeKg > 0 ? "+" : ""}${context.weightChangeKg}kg)`
+          : ""),
+    );
+  }
+  if (context.avgWeightKg !== null) {
+    lines.push(`週の平均体重: ${context.avgWeightKg}kg`);
+  }
+  if (context.goal) {
+    lines.push(
+      `目標: 開始${context.goal.startWeightKg}kg → 目標${context.goal.targetWeightKg}kg` +
+        (context.goal.targetDate ? `(目標日: ${context.goal.targetDate})` : ""),
+    );
+  } else {
+    lines.push("目標: 未設定");
+  }
+
+  lines.push(`食事記録日数: ${context.daysWithMealLog}/7日(合計${context.totalMealsLogged}件)`);
+  if (context.avgCaloriesKcal !== null) {
+    lines.push(`食事記録日の平均カロリー: 約${context.avgCaloriesKcal}kcal/日`);
   }
 
   return lines.join("\n");
@@ -274,5 +345,30 @@ export class ClaudeProvider implements AIProvider {
     }
 
     return { advice: parsed, modelUsed: DAILY_ADVICE_MODEL };
+  }
+
+  async generateWeeklyReview(context: WeeklyReviewContext): Promise<WeeklyReviewResult> {
+    const response = await this.client.messages.parse({
+      model: WEEKLY_REVIEW_MODEL,
+      max_tokens: 2048,
+      system: WEEKLY_REVIEW_SYSTEM_PROMPT,
+      output_config: {
+        format: zodOutputFormat(WeeklyReviewSchema),
+        effort: "medium",
+      },
+      messages: [
+        {
+          role: "user",
+          content: `次のデータをもとに、この1週間のレビューを日本語で生成してください:\n\n${formatWeeklyContextForPrompt(context)}`,
+        },
+      ],
+    });
+
+    const parsed: WeeklyReview | null = response.parsed_output;
+    if (!parsed) {
+      throw new Error("週次レビューの生成結果を読み取れませんでした");
+    }
+
+    return { review: parsed, modelUsed: WEEKLY_REVIEW_MODEL };
   }
 }
