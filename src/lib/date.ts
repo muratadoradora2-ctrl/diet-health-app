@@ -25,3 +25,14 @@ export function jstTimeString(date: Date = new Date()): string {
 export function jstDateTimeToISOString(date: string, time: string): string {
   return new Date(`${date}T${time}:00+09:00`).toISOString();
 }
+
+/** JSTでのその日(00:00〜翌日00:00)の範囲を、DBクエリ用のISO文字列で返す */
+export function jstDayRangeToISOStrings(dateStr: string): {
+  startIso: string;
+  endIso: string;
+} {
+  const start = new Date(`${dateStr}T00:00:00+09:00`);
+  const end = new Date(start);
+  end.setUTCDate(end.getUTCDate() + 1);
+  return { startIso: start.toISOString(), endIso: end.toISOString() };
+}

@@ -32,6 +32,22 @@ export type Goal = {
   updated_at: string;
 };
 
+export type Meal = {
+  id: string;
+  user_id: string;
+  eaten_at: string;
+  meal_type: "breakfast" | "lunch" | "dinner" | "snack";
+  input_text: string | null;
+  estimated_calories_kcal: number | null;
+  estimated_protein_g: number | null;
+  estimated_fat_g: number | null;
+  estimated_carbs_g: number | null;
+  estimated_fiber_g: number | null;
+  is_ai_estimated: boolean;
+  user_adjusted: boolean;
+  updated_at: string;
+};
+
 export type Profile = {
   user_id: string;
   display_name: string;

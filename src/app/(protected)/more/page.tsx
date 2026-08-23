@@ -29,9 +29,6 @@ export default async function MorePage() {
           </Link>
         </li>
         <li>
-          <span className="menu-item disabled">食事記録(準備中)</span>
-        </li>
-        <li>
           <span className="menu-item disabled">AIレビュー(準備中)</span>
         </li>
         <li>
