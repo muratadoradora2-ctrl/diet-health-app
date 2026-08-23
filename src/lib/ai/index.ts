@@ -15,4 +15,9 @@ export function getAIProvider(): AIProvider {
   return cached;
 }
 
-export type { AIProvider, BodyCompositionDraft, ImageInput } from "./provider";
+export type {
+  AIProvider,
+  BodyCompositionDraft,
+  ImageInput,
+  MealNutritionDraft,
+} from "./provider";

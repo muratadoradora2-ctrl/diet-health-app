@@ -28,6 +28,18 @@ export type ImageInput = {
   mimeType: "image/png" | "image/jpeg" | "image/webp";
 };
 
+export type MealNutritionDraft = {
+  /** 写真から識別した食事内容の説明。テキストからの推定時はnull */
+  description: string | null;
+  estimatedCaloriesKcal: number | null;
+  estimatedProteinG: number | null;
+  estimatedFatG: number | null;
+  estimatedCarbsG: number | null;
+  estimatedFiberG: number | null;
+};
+
 export interface AIProvider {
   analyzeBodyCompositionImage(image: ImageInput): Promise<BodyCompositionDraft>;
+  analyzeMealFromText(text: string): Promise<MealNutritionDraft>;
+  analyzeMealFromImage(image: ImageInput): Promise<MealNutritionDraft>;
 }

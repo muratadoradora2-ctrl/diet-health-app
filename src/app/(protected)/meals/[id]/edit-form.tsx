@@ -2,14 +2,13 @@
 
 import { useActionState } from "react";
 import { updateMealAction, deleteMealAction, type MealFormState } from "./actions";
-import { MealFields } from "../meal-fields";
+import { MealEntryForm } from "../meal-entry-form";
 import { jstDateString, jstTimeString } from "@/lib/date";
 import type { Meal } from "@/lib/types";
 
 const initialState: MealFormState = {};
 
 export function EditMealForm({ meal }: { meal: Meal }) {
-  const [state, formAction, pending] = useActionState(updateMealAction, initialState);
   const [deleteState, deleteAction, deletePending] = useActionState(
     deleteMealAction,
     initialState,
@@ -19,21 +18,23 @@ export function EditMealForm({ meal }: { meal: Meal }) {
 
   return (
     <>
-      <form action={formAction} className="card">
-        <input type="hidden" name="id" value={meal.id} />
-        {state.error && <p className="error-text">{state.error}</p>}
-
-        <MealFields
-          defaultDate={jstDateString(eatenAt)}
-          defaultTime={jstTimeString(eatenAt)}
-          defaultType={meal.meal_type}
-          defaultText={meal.input_text ?? ""}
-        />
-
-        <button className="button-primary" type="submit" disabled={pending}>
-          {pending ? "保存中…" : "保存する"}
-        </button>
-      </form>
+      <MealEntryForm
+        action={updateMealAction}
+        mealId={meal.id}
+        aiNotice={meal.is_ai_estimated}
+        submitLabel="保存する"
+        initialValues={{
+          mealType: meal.meal_type,
+          date: jstDateString(eatenAt),
+          time: jstTimeString(eatenAt),
+          text: meal.input_text ?? "",
+          caloriesKcal: meal.estimated_calories_kcal,
+          proteinG: meal.estimated_protein_g,
+          fatG: meal.estimated_fat_g,
+          carbsG: meal.estimated_carbs_g,
+          isAiEstimated: meal.is_ai_estimated,
+        }}
+      />
 
       <form
         action={deleteAction}

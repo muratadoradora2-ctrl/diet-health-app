@@ -35,12 +35,14 @@ export type MealInput = {
   eatenAt: string;
   mealType: "breakfast" | "lunch" | "dinner" | "snack";
   inputText: string;
+  estimatedCaloriesKcal?: number | null;
+  estimatedProteinG?: number | null;
+  estimatedFatG?: number | null;
+  estimatedCarbsG?: number | null;
+  estimatedFiberG?: number | null;
+  isAiEstimated: boolean;
 };
 
-/**
- * Phase 5時点ではテキスト入力のみ。AI栄養推定(estimated_*)はPhase 6で
- * 写真入力とあわせて実装するため、ここでは null のまま保存する。
- */
 export async function insertMeal(userId: string, input: MealInput) {
   const supabase = await createClient();
   const { error } = await supabase.from("meals").insert({
@@ -48,12 +50,21 @@ export async function insertMeal(userId: string, input: MealInput) {
     eaten_at: input.eatenAt,
     meal_type: input.mealType,
     input_text: input.inputText,
-    is_ai_estimated: false,
+    estimated_calories_kcal: input.estimatedCaloriesKcal ?? null,
+    estimated_protein_g: input.estimatedProteinG ?? null,
+    estimated_fat_g: input.estimatedFatG ?? null,
+    estimated_carbs_g: input.estimatedCarbsG ?? null,
+    estimated_fiber_g: input.estimatedFiberG ?? null,
+    is_ai_estimated: input.isAiEstimated,
   });
 
   if (error) throw new Error("食事の登録に失敗しました");
 }
 
+/**
+ * 編集画面からの更新は、内容がどう変わったかを厳密に追跡していないため、
+ * 一律 user_adjusted = true として保存する(AI推定でなかった行では未使用の値)。
+ */
 export async function updateMeal(userId: string, id: string, input: MealInput) {
   const supabase = await createClient();
   const { error } = await supabase
@@ -62,6 +73,13 @@ export async function updateMeal(userId: string, id: string, input: MealInput) {
       eaten_at: input.eatenAt,
       meal_type: input.mealType,
       input_text: input.inputText,
+      estimated_calories_kcal: input.estimatedCaloriesKcal ?? null,
+      estimated_protein_g: input.estimatedProteinG ?? null,
+      estimated_fat_g: input.estimatedFatG ?? null,
+      estimated_carbs_g: input.estimatedCarbsG ?? null,
+      estimated_fiber_g: input.estimatedFiberG ?? null,
+      is_ai_estimated: input.isAiEstimated,
+      user_adjusted: true,
     })
     .eq("user_id", userId)
     .eq("id", id);
