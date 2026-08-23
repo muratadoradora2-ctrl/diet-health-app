@@ -148,6 +148,21 @@ h3 {
   flex: 1;
 }
 
+.checkbox-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  margin-bottom: 16px;
+}
+
+.checkbox-field input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
 .field label {
   font-size: 0.85rem;
   color: var(--ink-soft);
@@ -477,6 +492,11 @@ h3 {
   text-align: right;
   font-size: 0.78rem;
   color: var(--ink-soft);
+}
+
+a.history-item {
+  text-decoration: none;
+  color: inherit;
 }
 
 /* --- 食事 --- */

@@ -53,3 +53,12 @@ export type Profile = {
   display_name: string;
   menstrual_tracking_enabled: boolean;
 };
+
+export type MenstrualCycle = {
+  id: string;
+  user_id: string;
+  start_date: string;
+  end_date: string | null;
+  memo: string | null;
+  updated_at: string;
+};

@@ -58,3 +58,17 @@ export async function updateDisplayName(userId: string, displayName: string) {
 
   if (error) throw new Error("プロフィールの更新に失敗しました");
 }
+
+/**
+ * 生理周期記録機能の表示有無を切り替える。本人の行のみRLSで更新可能なため、
+ * 配偶者が相手のこの設定を読む・変更することはできない。
+ */
+export async function updateMenstrualTrackingEnabled(userId: string, enabled: boolean) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("profiles")
+    .update({ menstrual_tracking_enabled: enabled })
+    .eq("user_id", userId);
+
+  if (error) throw new Error("設定の更新に失敗しました");
+}

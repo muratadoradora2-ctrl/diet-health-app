@@ -5,7 +5,13 @@ import { updateProfileAction, type ProfileFormState } from "./actions";
 
 const initialState: ProfileFormState = {};
 
-export function ProfileForm({ displayName }: { displayName: string }) {
+export function ProfileForm({
+  displayName,
+  menstrualTrackingEnabled,
+}: {
+  displayName: string;
+  menstrualTrackingEnabled: boolean;
+}) {
   const [state, formAction, pending] = useActionState(updateProfileAction, initialState);
 
   return (
@@ -16,6 +22,14 @@ export function ProfileForm({ displayName }: { displayName: string }) {
         <label htmlFor="displayName">表示名</label>
         <input id="displayName" name="displayName" type="text" defaultValue={displayName} required />
       </div>
+      <label className="checkbox-field">
+        <input
+          type="checkbox"
+          name="menstrualTrackingEnabled"
+          defaultChecked={menstrualTrackingEnabled}
+        />
+        生理周期を記録する(この端末の利用者本人のみに表示されます)
+      </label>
       <button className="button-secondary" type="submit" disabled={pending}>
         保存
       </button>

@@ -19,7 +19,10 @@ export default async function MorePage() {
           <h2 className="card-title">プロフィール</h2>
           <p className="lead-note">{user.email}</p>
         </div>
-        <ProfileForm displayName={profile.display_name} />
+        <ProfileForm
+          displayName={profile.display_name}
+          menstrualTrackingEnabled={profile.menstrual_tracking_enabled}
+        />
       </div>
 
       <ul className="menu-list">
@@ -33,9 +36,13 @@ export default async function MorePage() {
             週次AIレビュー
           </Link>
         </li>
-        <li>
-          <span className="menu-item disabled">生理管理(準備中)</span>
-        </li>
+        {profile.menstrual_tracking_enabled && (
+          <li>
+            <Link href="/cycles" className="menu-item">
+              生理管理
+            </Link>
+          </li>
+        )}
       </ul>
 
       <form action={signOut}>
