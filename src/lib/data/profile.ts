@@ -39,6 +39,16 @@ export async function getOrCreateProfile(
   return created;
 }
 
+export async function getProfile(userId: string): Promise<Profile | null> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("profiles")
+    .select("user_id, display_name, menstrual_tracking_enabled")
+    .eq("user_id", userId)
+    .maybeSingle();
+  return data ?? null;
+}
+
 export async function updateDisplayName(userId: string, displayName: string) {
   const supabase = await createClient();
   const { error } = await supabase

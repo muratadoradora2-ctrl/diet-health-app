@@ -5,6 +5,9 @@ import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import type {
   AIProvider,
   BodyCompositionDraft,
+  DailyAdvice,
+  DailyAdviceContext,
+  DailyAdviceResult,
   ImageInput,
   MealNutritionDraft,
 } from "./provider";
@@ -12,6 +15,7 @@ import type {
 // コスト・精度のバランスはPhase 4実装時に環境変数で切替可能にする(Phase 1合意事項)。
 const BODY_SCAN_MODEL = process.env.AI_BODY_SCAN_MODEL || "claude-opus-5";
 const MEAL_ANALYSIS_MODEL = process.env.AI_MEAL_ANALYSIS_MODEL || "claude-opus-5";
+const DAILY_ADVICE_MODEL = process.env.AI_DAILY_ADVICE_MODEL || "claude-opus-5";
 
 const BodyCompositionDraftSchema = z.object({
   weightKg: z.number().nullable().describe("体重(kg)"),
@@ -53,6 +57,91 @@ const MEAL_SYSTEM_PROMPT = `あなたは食事内容から栄養価を推定す�
 情報が少ない、または量が不明な場合は、一般的な1人前の分量を仮定して構いません。
 数値化がまったくできない場合のみ、そのフィールドをnullにしてください。
 この推定はあくまで参考値であり、正確な栄養計算ではないことを前提とします。`;
+
+const DailyAdviceSchema = z.object({
+  points: z
+    .array(z.string())
+    .min(1)
+    .max(4)
+    .describe("今日のアドバイスの要点。箇条書きで2〜4件程度、それぞれ1〜2文で簡潔に"),
+  detail: z
+    .string()
+    .describe("要点を踏まえた、もう少し詳しい解説文(3〜6文程度)"),
+});
+
+/**
+ * 安全性の制約(元の要件定義 セクション12/17を反映):
+ *   - 極端な食事制限・断食・欠食・過度な運動・急激な減量を勧めない
+ *   - 医療行為の代替(診断・処方に類する助言)を行わない
+ *   - 単日の増減ではなく、7日〜数週間の傾向で評価する
+ *   - 一時的な体重増加の後に過度な制限を勧めない
+ *   - 生理周期との相関に触れる場合は断定せず、あくまで一般的な傾向として
+ *     ヘッジした表現にとどめる(本アプリでは生理データ自体はこのコンテキストに
+ *     含まれないため、通常は言及しない)
+ *   - 常にAIによる参考情報であることが伝わる、断定しすぎない口調で書く
+ */
+const DAILY_ADVICE_SYSTEM_PROMPT = `あなたは、夫婦2人のためのダイエット・健康管理アプリの中で、
+日々の体組成・食事記録をもとにパーソナライズされたアドバイスを生成するアシスタントです。
+
+必ず守るルール:
+- 極端な食事制限、断食、欠食、過度な運動、急激な減量は絶対に勧めない。
+- 医療行為の代替となるような診断・処方に類する助言は行わない。体調に不安がある場合は
+  医療機関へ相談するよう促す。
+- 単日の体重の増減だけで一喜一憂させるのではなく、7日〜数週間単位の傾向をもとに、
+  holisticに(全体的に)評価する。
+- 一時的な体重増加があっても、過度な食事制限を勧めない。水分量や生活リズムなど
+  複数の要因があり得ることを踏まえた、穏やかで前向きなトーンで書く。
+- 断定的な表現を避け、あくまで参考情報であることが伝わる書き方にする。
+- 提供された数値データの範囲内で助言し、存在しないデータを創作しない。
+- ポジティブで、続けたくなるような励ましのトーンを基本とする。`;
+
+function formatContextForPrompt(context: DailyAdviceContext): string {
+  const lines: string[] = [];
+  lines.push(`利用者名: ${context.displayName}`);
+
+  if (context.today.latestWeightKg !== null) {
+    lines.push(
+      `直近の体重: ${context.today.latestWeightKg}kg` +
+        (context.today.latestMeasuredAt ? `(測定: ${context.today.latestMeasuredAt})` : ""),
+    );
+  }
+  if (context.today.bodyFatPercent !== null) {
+    lines.push(`直近の体脂肪率: ${context.today.bodyFatPercent}%`);
+  }
+  if (context.change7dKg !== null) {
+    lines.push(`7日間の体重変化: ${context.change7dKg > 0 ? "+" : ""}${context.change7dKg}kg`);
+  }
+  if (context.change30dKg !== null) {
+    lines.push(`30日間の体重変化: ${context.change30dKg > 0 ? "+" : ""}${context.change30dKg}kg`);
+  }
+  if (context.goal) {
+    lines.push(
+      `目標: 開始${context.goal.startWeightKg}kg → 目標${context.goal.targetWeightKg}kg` +
+        (context.goal.targetDate ? `(目標日: ${context.goal.targetDate})` : ""),
+    );
+  } else {
+    lines.push("目標: 未設定");
+  }
+
+  if (context.recentWeights.length > 0) {
+    lines.push("直近の体重推移(日付: 体重kg):");
+    for (const point of context.recentWeights) {
+      lines.push(`  ${point.date}: ${point.weightKg}kg`);
+    }
+  }
+
+  if (context.todaysMeals.length > 0) {
+    lines.push("本日記録済みの食事:");
+    for (const meal of context.todaysMeals) {
+      const kcal = meal.caloriesKcal !== null ? `約${meal.caloriesKcal}kcal` : "カロリー不明";
+      lines.push(`  ${meal.mealType}: ${meal.text ?? "(内容未記録)"} (${kcal})`);
+    }
+  } else {
+    lines.push("本日記録済みの食事: なし");
+  }
+
+  return lines.join("\n");
+}
 
 export class ClaudeProvider implements AIProvider {
   private client: Anthropic;
@@ -160,5 +249,30 @@ export class ClaudeProvider implements AIProvider {
       throw new Error("画像の解析結果を読み取れませんでした");
     }
     return parsed;
+  }
+
+  async generateDailyAdvice(context: DailyAdviceContext): Promise<DailyAdviceResult> {
+    const response = await this.client.messages.parse({
+      model: DAILY_ADVICE_MODEL,
+      max_tokens: 2048,
+      system: DAILY_ADVICE_SYSTEM_PROMPT,
+      output_config: {
+        format: zodOutputFormat(DailyAdviceSchema),
+        effort: "medium",
+      },
+      messages: [
+        {
+          role: "user",
+          content: `次のデータをもとに、今日のアドバイスを日本語で生成してください:\n\n${formatContextForPrompt(context)}`,
+        },
+      ],
+    });
+
+    const parsed: DailyAdvice | null = response.parsed_output;
+    if (!parsed) {
+      throw new Error("アドバイスの生成結果を読み取れませんでした");
+    }
+
+    return { advice: parsed, modelUsed: DAILY_ADVICE_MODEL };
   }
 }

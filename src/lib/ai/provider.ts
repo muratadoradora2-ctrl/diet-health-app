@@ -38,8 +38,46 @@ export type MealNutritionDraft = {
   estimatedFiberG: number | null;
 };
 
+/** 日次AIアドバイス生成に渡す、本人の直近データのまとめ */
+export type DailyAdviceContext = {
+  displayName: string;
+  today: {
+    latestWeightKg: number | null;
+    latestMeasuredAt: string | null;
+    bodyFatPercent: number | null;
+  };
+  change7dKg: number | null;
+  change30dKg: number | null;
+  goal: {
+    startWeightKg: number;
+    targetWeightKg: number;
+    targetDate: string | null;
+  } | null;
+  /** 直近7日分、日付昇順 */
+  recentWeights: { date: string; weightKg: number }[];
+  /** 本日記録済みの食事(種類・内容・推定カロリー) */
+  todaysMeals: {
+    mealType: "breakfast" | "lunch" | "dinner" | "snack";
+    text: string | null;
+    caloriesKcal: number | null;
+  }[];
+};
+
+export type DailyAdvice = {
+  /** 箇条書きの要点(2〜4件程度) */
+  points: string[];
+  /** 詳しい解説文 */
+  detail: string;
+};
+
+export type DailyAdviceResult = {
+  advice: DailyAdvice;
+  modelUsed: string;
+};
+
 export interface AIProvider {
   analyzeBodyCompositionImage(image: ImageInput): Promise<BodyCompositionDraft>;
   analyzeMealFromText(text: string): Promise<MealNutritionDraft>;
   analyzeMealFromImage(image: ImageInput): Promise<MealNutritionDraft>;
+  generateDailyAdvice(context: DailyAdviceContext): Promise<DailyAdviceResult>;
 }

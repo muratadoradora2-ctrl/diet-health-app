@@ -256,6 +256,76 @@ h3 {
   color: var(--accent-strong);
 }
 
+/* --- 日次AIアドバイス --- */
+
+.advice-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.advice-header {
+  margin-bottom: 4px;
+}
+
+.advice-points {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.advice-points li {
+  position: relative;
+  padding-left: 18px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.advice-points li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 0.55em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.advice-detail {
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.advice-refresh-form {
+  margin-bottom: 12px;
+}
+
+.advice-refresh-btn {
+  width: fit-content;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+
+.advice-refresh-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.ai-disclaimer {
+  font-size: 0.76rem;
+  color: var(--ink-soft);
+}
+
 /* --- ホーム/数値表示 --- */
 
 .hero-card {

@@ -1,9 +1,11 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { requireAllowedUser } from "@/lib/auth/require-allowed-user";
 import { getActiveGoal } from "@/lib/data/goals";
 import { listBodyCompositions } from "@/lib/data/body-compositions";
 import { computeDashboardMetrics } from "@/lib/metrics";
 import { formatDateOnly, formatJstDateTime } from "@/lib/date";
+import { AdviceCard, AdviceCardSkeleton } from "./advice-card";
 
 function formatKg(value: number | null | undefined) {
   if (value === null || value === undefined) return "—";
@@ -152,6 +154,10 @@ export default async function HomePage() {
               </Link>
             </div>
           )}
+
+          <Suspense fallback={<AdviceCardSkeleton />}>
+            <AdviceCard />
+          </Suspense>
 
           <div className="card stack">
             <h2 className="card-title">直近の変化</h2>

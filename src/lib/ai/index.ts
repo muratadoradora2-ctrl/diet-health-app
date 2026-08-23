@@ -18,6 +18,9 @@ export function getAIProvider(): AIProvider {
 export type {
   AIProvider,
   BodyCompositionDraft,
+  DailyAdvice,
+  DailyAdviceContext,
+  DailyAdviceResult,
   ImageInput,
   MealNutritionDraft,
 } from "./provider";
