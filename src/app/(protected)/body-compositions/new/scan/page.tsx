@@ -1,6 +1,9 @@
 import { requireAllowedUser } from "@/lib/auth/require-allowed-user";
 import { ScanFlow } from "./scan-flow";
 
+// Buffer操作・Anthropic SDKを使うため、Node.jsランタイムを明示する。
+export const runtime = "nodejs";
+
 export default async function ScanBodyCompositionPage() {
   await requireAllowedUser();
 
