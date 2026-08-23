@@ -1,6 +1,5 @@
 /*
- * Phase 1設計書のカラーパレットを暫定的に反映した最小限のトークン。
- * 本格的なデザインシステム（コンポーネント・タイポグラフィ等）はPhase 3で構築する。
+ * Phase 1設計書のカラーパレット・タイポグラフィを反映したデザイントークン。
  */
 :root {
   --bg: #f6f4ef;
@@ -11,7 +10,12 @@
   --line: #e2ddd0;
   --accent: #6c8060;
   --accent-strong: #4c5c42;
+  --accent-tint: #e7ebe0;
   --danger: #b3543a;
+  --font-display: "Zen Old Mincho", "Hiragino Mincho ProN", "Noto Serif JP", serif;
+  --font-body:
+    "Zen Kaku Gothic New", -apple-system, BlinkMacSystemFont, "Hiragino Sans",
+    "Noto Sans JP", system-ui, sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -24,6 +28,7 @@
     --line: #3c392f;
     --accent: #9db08c;
     --accent-strong: #c4d4b4;
+    --accent-tint: #333b2c;
     --danger: #d79a73;
   }
 }
@@ -45,9 +50,7 @@ body {
   flex-direction: column;
   color: var(--ink);
   background: var(--bg);
-  font-family:
-    -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP",
-    system-ui, sans-serif;
+  font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -61,11 +64,72 @@ a {
   color: var(--accent-strong);
 }
 
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+}
+
+/* --- レイアウト --- */
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  flex: 1;
+}
+
+.app-content {
+  flex: 1;
+}
+
+.page {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 24px 20px calc(96px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.page-header {
+  margin-bottom: 4px;
+}
+
+.page-eyebrow {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  margin-bottom: 2px;
+}
+
+.page-title {
+  font-size: 1.4rem;
+}
+
+.card-title {
+  font-size: 1.02rem;
+  margin-bottom: 12px;
+}
+
+/* --- 汎用コンポーネント --- */
+
 .card {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 16px;
   padding: 24px;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.lead-note {
+  color: var(--ink-soft);
+  font-size: 0.88rem;
 }
 
 .field {
@@ -75,9 +139,23 @@ a {
   margin-bottom: 16px;
 }
 
+.field-row {
+  display: flex;
+  gap: 12px;
+}
+
+.field-row .field {
+  flex: 1;
+}
+
 .field label {
   font-size: 0.85rem;
   color: var(--ink-soft);
+}
+
+.field-unit {
+  color: var(--ink-soft);
+  font-weight: 400;
 }
 
 .field input {
@@ -87,6 +165,7 @@ a {
   border: 1px solid var(--line);
   background: var(--bg);
   color: var(--ink);
+  width: 100%;
 }
 
 .field input:focus-visible {
@@ -95,6 +174,7 @@ a {
 }
 
 .button-primary {
+  display: block;
   width: 100%;
   padding: 13px 18px;
   border-radius: 10px;
@@ -103,6 +183,8 @@ a {
   color: var(--surface);
   font-size: 1rem;
   font-weight: 600;
+  text-align: center;
+  text-decoration: none;
   cursor: pointer;
 }
 
@@ -112,12 +194,16 @@ a {
 }
 
 .button-secondary {
+  display: block;
+  width: fit-content;
   padding: 10px 16px;
   border-radius: 10px;
   border: 1px solid var(--line);
   background: transparent;
   color: var(--ink);
   font-size: 0.95rem;
+  text-align: center;
+  text-decoration: none;
   cursor: pointer;
 }
 
@@ -125,4 +211,304 @@ a {
   color: var(--danger);
   font-size: 0.9rem;
   margin-bottom: 12px;
+}
+
+.success-text {
+  color: var(--accent-strong);
+  font-size: 0.9rem;
+  margin-bottom: 12px;
+}
+
+/* --- ホーム/数値表示 --- */
+
+.hero-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.hero-stat {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.hero-value {
+  font-family: var(--font-display);
+  font-size: 3rem;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.hero-unit {
+  font-size: 1.1rem;
+  color: var(--ink-soft);
+}
+
+.hero-date {
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+}
+
+.stat-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.stat-label {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  margin-bottom: 2px;
+}
+
+.stat-value {
+  font-size: 1.4rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-value-sm {
+  font-size: 1.05rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-unit {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+/* --- 目標進捗 --- */
+
+.goal-flow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.goal-arrow {
+  color: var(--ink-soft);
+}
+
+.progress-track {
+  height: 8px;
+  border-radius: 6px;
+  background: var(--surface-2);
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 6px;
+}
+
+/* --- 履歴一覧 --- */
+
+.history-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+}
+
+.history-date {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  margin-bottom: 2px;
+}
+
+.history-weight {
+  font-size: 1.15rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.history-sub {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: right;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+}
+
+/* --- タブ --- */
+
+.tab-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+}
+
+.tab-row-sm {
+  margin-top: -4px;
+}
+
+.tab-button {
+  padding: 9px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 0.92rem;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.tab-button.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--surface);
+}
+
+.tab-button-sm {
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.tab-button-sm.active {
+  background: var(--accent-tint);
+  border-color: var(--accent);
+  color: var(--accent-strong);
+  font-weight: 600;
+}
+
+/* --- グラフ --- */
+
+.chart-wrap {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.chart-yaxis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: var(--ink-soft);
+  text-align: right;
+  padding: 2px 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.chart-svg {
+  flex: 1;
+  width: 100%;
+  height: 220px;
+  display: block;
+}
+
+.chart-avg-line {
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.chart-dot {
+  fill: var(--ink-soft);
+  opacity: 0.55;
+}
+
+.chart-axis {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+  margin-top: 6px;
+}
+
+.chart-legend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  margin-top: 12px;
+}
+
+.chart-legend-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ink-soft);
+  opacity: 0.55;
+  display: inline-block;
+  margin-left: 6px;
+}
+
+.chart-legend-dot:first-child {
+  margin-left: 0;
+}
+
+.chart-legend-line {
+  width: 14px;
+  height: 2px;
+  background: var(--accent);
+  display: inline-block;
+  margin-left: 6px;
+}
+
+/* --- メニュー --- */
+
+.menu-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.menu-item {
+  display: block;
+  padding: 15px 18px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+.menu-item.disabled {
+  color: var(--ink-soft);
+}
+
+/* --- 下部ナビゲーション --- */
+
+.bottom-nav {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  padding: 8px 4px calc(8px + env(safe-area-inset-bottom));
+}
+
+.bottom-nav-item {
+  flex: 1;
+  text-align: center;
+  padding: 6px 0;
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+  text-decoration: none;
+}
+
+.bottom-nav-item.active {
+  color: var(--accent-strong);
+  font-weight: 600;
 }

@@ -1,0 +1,27 @@
+/**
+ * このアプリの利用者は日本在住の2名のみのため、日付・時刻の入力/表示は
+ * 常にAsia/Tokyo(JST)基準で扱う。
+ */
+
+function toJst(date: Date): Date {
+  return new Date(date.toLocaleString("en-US", { timeZone: "Asia/Tokyo" }));
+}
+
+function pad(n: number): string {
+  return String(n).padStart(2, "0");
+}
+
+export function jstDateString(date: Date = new Date()): string {
+  const jst = toJst(date);
+  return `${jst.getFullYear()}-${pad(jst.getMonth() + 1)}-${pad(jst.getDate())}`;
+}
+
+export function jstTimeString(date: Date = new Date()): string {
+  const jst = toJst(date);
+  return `${pad(jst.getHours())}:${pad(jst.getMinutes())}`;
+}
+
+/** 日付入力(YYYY-MM-DD)と時刻入力(HH:mm)をJSTとして解釈し、UTCのISO文字列にする */
+export function jstDateTimeToISOString(date: string, time: string): string {
+  return new Date(`${date}T${time}:00+09:00`).toISOString();
+}
