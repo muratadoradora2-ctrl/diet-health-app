@@ -5,7 +5,9 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { getAIProvider, type BodyCompositionDraft } from "@/lib/ai";
 import { sniffImageMimeType } from "@/lib/image-validation";
 
-const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+// Vercelのリクエストサイズ上限(約4.5MB、変更不可)を超えないよう4MBに設定。
+// next.config.tsのserverActions.bodySizeLimitも同じ値に揃えている。
+const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
 
 export type ScanState = {
   status: "idle" | "error" | "success";
@@ -43,7 +45,7 @@ export async function analyzeBodyCompositionImage(
     return { status: "error", error: "画像を選択してください。" };
   }
   if (file.size > MAX_IMAGE_BYTES) {
-    return { status: "error", error: "画像サイズが大きすぎます(10MBまでです)。" };
+    return { status: "error", error: "画像サイズが大きすぎます(4MBまでです)。" };
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());
