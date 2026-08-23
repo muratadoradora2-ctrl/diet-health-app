@@ -14,7 +14,10 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // 静的アセット・favicon以外の全パスに適用
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    // 静的アセット・favicon・PWAマニフェスト/アイコン以外の全パスに適用。
+    // manifest.webmanifestとapple-iconは、ログイン前(ログイン画面表示中や
+    // ホーム画面への追加操作時)にもブラウザ・iOSから取得されるため、
+    // ログイン必須の対象から除外する(いずれも個人データを含まない)。
+    "/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|apple-icon|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

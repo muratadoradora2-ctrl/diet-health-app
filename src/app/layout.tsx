@@ -4,10 +4,18 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "ふたり健康管理",
   description: "夫婦2人専用のダイエット・体調管理アプリ",
+  appleWebApp: {
+    title: "ふたり健康管理",
+    statusBarStyle: "black-translucent",
+  },
 };
 
 export const viewport: Viewport = {
   viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f6f4ef" },
+    { media: "(prefers-color-scheme: dark)", color: "#1e1d19" },
+  ],
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
