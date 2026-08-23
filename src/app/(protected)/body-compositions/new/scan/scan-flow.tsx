@@ -2,14 +2,16 @@
 
 import { useActionState, useState } from "react";
 import Link from "next/link";
-import { analyzeBodyCompositionImage, initialScanState } from "./actions";
+import { analyzeBodyCompositionImage, type ScanState } from "./actions";
 import { BodyCompositionForm } from "../form";
 import { jstDateString, jstTimeString } from "@/lib/date";
+
+const initialState: ScanState = { status: "idle" };
 
 export function ScanFlow() {
   const [state, formAction, pending] = useActionState(
     analyzeBodyCompositionImage,
-    initialScanState,
+    initialState,
   );
   const [fileName, setFileName] = useState<string | null>(null);
 

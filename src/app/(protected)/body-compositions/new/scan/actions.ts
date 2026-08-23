@@ -15,8 +15,8 @@ export type ScanState = {
   draft?: BodyCompositionDraft;
 };
 
-export const initialScanState: ScanState = { status: "idle" };
-
+// "use server"ファイルは非同期関数以外をエクスポートできないため、初期状態は
+// ここでは定義せず、呼び出し側(scan-flow.tsx)でローカルに定義する。
 const GENERIC_ERROR: ScanState = {
   status: "error",
   error: "画像の解析に失敗しました。もう一度お試しいただくか、手入力をご利用ください。",
