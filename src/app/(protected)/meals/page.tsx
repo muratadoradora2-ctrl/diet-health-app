@@ -1,18 +1,12 @@
 import Link from "next/link";
 import { requireAllowedUser } from "@/lib/auth/require-allowed-user";
 import { listMealsBetween } from "@/lib/data/meals";
-import { jstDateString, jstDayRangeToISOStrings } from "@/lib/date";
+import { formatJstDateTime, jstDateString, jstDayRangeToISOStrings } from "@/lib/date";
 import type { Meal } from "@/lib/types";
-
-const MEAL_TYPES = [
-  { key: "breakfast", label: "朝食" },
-  { key: "lunch", label: "昼食" },
-  { key: "dinner", label: "夕食" },
-  { key: "snack", label: "間食" },
-] as const;
+import { MEAL_TYPES } from "./meal-fields";
 
 function formatTime(iso: string) {
-  return new Date(iso).toLocaleString("ja-JP", { hour: "2-digit", minute: "2-digit" });
+  return formatJstDateTime(iso, { hour: "2-digit", minute: "2-digit" });
 }
 
 export default async function MealsPage() {
@@ -51,9 +45,11 @@ export default async function MealsPage() {
             ) : (
               <ul className="meal-entry-list">
                 {entries.map((meal) => (
-                  <li key={meal.id} className="meal-entry">
-                    <span className="meal-entry-time">{formatTime(meal.eaten_at)}</span>
-                    <span className="meal-entry-text">{meal.input_text}</span>
+                  <li key={meal.id}>
+                    <Link href={`/meals/${meal.id}`} className="meal-entry">
+                      <span className="meal-entry-time">{formatTime(meal.eaten_at)}</span>
+                      <span className="meal-entry-text">{meal.input_text}</span>
+                    </Link>
                   </li>
                 ))}
               </ul>

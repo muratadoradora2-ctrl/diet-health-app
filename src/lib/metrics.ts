@@ -1,4 +1,5 @@
 import type { BodyComposition, Goal } from "@/lib/types";
+import { jstDateString } from "@/lib/date";
 
 export type DashboardMetrics = {
   latest: BodyComposition | null;
@@ -81,7 +82,11 @@ export type MovingAveragePoint = {
 
 type NumericMetricField = "weight_kg" | "body_fat_percent" | "muscle_mass_kg";
 
-/** 同日に複数の記録がある場合は、measured_at昇順の入力を前提に最後の値を採用する */
+/**
+ * 同日に複数の記録がある場合は、measured_at昇順の入力を前提に最後の値を採用する。
+ * 「同日」はJST基準で判定する(measured_atはUTCのISO文字列のため、単純に
+ * 先頭10文字を切り出すと、JSTの朝の記録がUTC上は前日扱いになってしまう)。
+ */
 function toDailySeries(
   entriesAsc: BodyComposition[],
   field: NumericMetricField,
@@ -90,7 +95,7 @@ function toDailySeries(
   for (const entry of entriesAsc) {
     const value = entry[field];
     if (value === null || value === undefined) continue;
-    byDate.set(entry.measured_at.slice(0, 10), value);
+    byDate.set(jstDateString(new Date(entry.measured_at)), value);
   }
   return Array.from(byDate.entries())
     .sort(([a], [b]) => a.localeCompare(b))

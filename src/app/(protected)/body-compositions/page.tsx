@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { requireAllowedUser } from "@/lib/auth/require-allowed-user";
 import { listBodyCompositions } from "@/lib/data/body-compositions";
+import { formatJstDateTime } from "@/lib/date";
 
 function formatDateTime(iso: string) {
-  return new Date(iso).toLocaleString("ja-JP", {
+  return formatJstDateTime(iso, {
     month: "numeric",
     day: "numeric",
     hour: "2-digit",

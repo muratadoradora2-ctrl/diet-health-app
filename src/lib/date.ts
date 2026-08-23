@@ -36,3 +36,25 @@ export function jstDayRangeToISOStrings(dateStr: string): {
   end.setUTCDate(end.getUTCDate() + 1);
   return { startIso: start.toISOString(), endIso: end.toISOString() };
 }
+
+/**
+ * timestamptz(ISO文字列)をJSTとして表示用にフォーマットする。
+ * サーバー(Vercel)はUTCで動作するため、timeZoneを明示しないと
+ * 実際に入力・保存した時刻と異なる時刻が表示されてしまう。
+ */
+export function formatJstDateTime(iso: string, options: Intl.DateTimeFormatOptions): string {
+  return new Date(iso).toLocaleString("ja-JP", { ...options, timeZone: "Asia/Tokyo" });
+}
+
+/**
+ * date型(YYYY-MM-DD、時刻情報を持たない)の文字列を表示用にフォーマットする。
+ * タイムゾーンの影響を受けないよう、Dateオブジェクトのローカルコンストラクタで
+ * 組み立ててからtimeZone指定なしでフォーマットする(値が往復して一致する)。
+ */
+export function formatDateOnly(
+  dateStr: string,
+  options: Intl.DateTimeFormatOptions = { month: "numeric", day: "numeric" },
+): string {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  return new Date(year, month - 1, day).toLocaleDateString("ja-JP", options);
+}

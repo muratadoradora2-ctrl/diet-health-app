@@ -1,12 +1,10 @@
 import { requireAllowedUser } from "@/lib/auth/require-allowed-user";
 import { jstDateString, jstTimeString } from "@/lib/date";
 import { MealForm } from "./form";
+import { MEAL_TYPES, type MealTypeKey } from "../meal-fields";
 
-const VALID_TYPES = ["breakfast", "lunch", "dinner", "snack"] as const;
-type MealType = (typeof VALID_TYPES)[number];
-
-function isMealType(value: string | undefined): value is MealType {
-  return VALID_TYPES.includes(value as MealType);
+function isMealType(value: string | undefined): value is MealTypeKey {
+  return MEAL_TYPES.some((mealType) => mealType.key === value);
 }
 
 export default async function NewMealPage({
@@ -16,7 +14,7 @@ export default async function NewMealPage({
 }) {
   await requireAllowedUser();
   const { type } = await searchParams;
-  const defaultType: MealType = isMealType(type) ? type : "breakfast";
+  const defaultType: MealTypeKey = isMealType(type) ? type : "breakfast";
 
   return (
     <main className="page">

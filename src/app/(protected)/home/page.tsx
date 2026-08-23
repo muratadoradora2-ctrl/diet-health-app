@@ -3,6 +3,7 @@ import { requireAllowedUser } from "@/lib/auth/require-allowed-user";
 import { getActiveGoal } from "@/lib/data/goals";
 import { listBodyCompositions } from "@/lib/data/body-compositions";
 import { computeDashboardMetrics } from "@/lib/metrics";
+import { formatDateOnly, formatJstDateTime } from "@/lib/date";
 
 function formatKg(value: number | null | undefined) {
   if (value === null || value === undefined) return "—";
@@ -38,7 +39,7 @@ export default async function HomePage() {
     <main className="page">
       <header className="page-header">
         <p className="page-eyebrow">
-          {new Date().toLocaleDateString("ja-JP", {
+          {formatJstDateTime(new Date().toISOString(), {
             month: "long",
             day: "numeric",
             weekday: "short",
@@ -63,7 +64,7 @@ export default async function HomePage() {
             </div>
             <p className="hero-date">
               測定{" "}
-              {new Date(latest.measured_at).toLocaleString("ja-JP", {
+              {formatJstDateTime(latest.measured_at, {
                 month: "numeric",
                 day: "numeric",
                 hour: "2-digit",
@@ -138,12 +139,7 @@ export default async function HomePage() {
                 {goal.target_date && (
                   <div>
                     <p className="stat-label">目標日</p>
-                    <p className="stat-value-sm">
-                      {new Date(goal.target_date).toLocaleDateString("ja-JP", {
-                        month: "numeric",
-                        day: "numeric",
-                      })}
-                    </p>
+                    <p className="stat-value-sm">{formatDateOnly(goal.target_date)}</p>
                   </div>
                 )}
               </div>
