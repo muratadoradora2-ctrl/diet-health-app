@@ -1,8 +1,15 @@
 /**
  * ホーム画面アイコン等で使う共通のマーク。globals.cssのデザイントークン
- * (--accent, --bg)と同じ配色を、ImageResponse用に直接値として使う。
+ * (--accent, --bg)と近い配色で、丸顔のかわいいキャラクターを描く。
  */
 export function AppIconMark({ size }: { size: number }) {
+  const faceSize = size * 0.66;
+  const eyeSize = size * 0.075;
+  const blushSize = size * 0.09;
+  const mouthWidth = size * 0.16;
+  const mouthHeight = mouthWidth * 0.55;
+  const borderWidth = Math.max(1, size * 0.018);
+
   return (
     <div
       style={{
@@ -11,19 +18,82 @@ export function AppIconMark({ size }: { size: number }) {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "#6c8060",
+        background: "#7a9068",
       }}
     >
-      <span
+      <div
         style={{
-          fontSize: size * 0.56,
-          color: "#f6f4ef",
-          fontFamily: "serif",
-          lineHeight: 1,
+          position: "relative",
+          width: faceSize,
+          height: faceSize,
+          borderRadius: "50%",
+          background: "#fdf6ea",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
-        健
-      </span>
+        <div
+          style={{
+            display: "flex",
+            gap: faceSize * 0.22,
+            marginBottom: faceSize * 0.08,
+          }}
+        >
+          <div
+            style={{
+              width: eyeSize,
+              height: eyeSize,
+              borderRadius: "50%",
+              background: "#4a4537",
+            }}
+          />
+          <div
+            style={{
+              width: eyeSize,
+              height: eyeSize,
+              borderRadius: "50%",
+              background: "#4a4537",
+            }}
+          />
+        </div>
+        <div
+          style={{
+            width: mouthWidth,
+            height: mouthHeight,
+            borderBottomLeftRadius: mouthWidth,
+            borderBottomRightRadius: mouthWidth,
+            borderLeft: `${borderWidth}px solid #4a4537`,
+            borderRight: `${borderWidth}px solid #4a4537`,
+            borderBottom: `${borderWidth}px solid #4a4537`,
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            left: faceSize * 0.1,
+            top: faceSize * 0.54,
+            width: blushSize,
+            height: blushSize * 0.66,
+            borderRadius: "50%",
+            background: "#eeaba0",
+            opacity: 0.75,
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            right: faceSize * 0.1,
+            top: faceSize * 0.54,
+            width: blushSize,
+            height: blushSize * 0.66,
+            borderRadius: "50%",
+            background: "#eeaba0",
+            opacity: 0.75,
+          }}
+        />
+      </div>
     </div>
   );
 }
