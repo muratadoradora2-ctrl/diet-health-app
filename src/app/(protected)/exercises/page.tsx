@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { requireAllowedUser } from "@/lib/auth/require-allowed-user";
 import { listExercisesBetween } from "@/lib/data/exercises";
+import { getDailySteps } from "@/lib/data/daily-steps";
 import { formatJstDateTime, jstDateString, jstDayRangeToISOStrings } from "@/lib/date";
 import { getExerciseLabel } from "@/lib/exercise-met";
+import { StepsForm } from "./steps-form";
 
 function formatTime(iso: string) {
   return formatJstDateTime(iso, { hour: "2-digit", minute: "2-digit" });
@@ -12,7 +14,10 @@ export default async function ExercisesPage() {
   const user = await requireAllowedUser();
   const today = jstDateString();
   const { startIso, endIso } = jstDayRangeToISOStrings(today);
-  const exercises = await listExercisesBetween(user.id, startIso, endIso);
+  const [exercises, dailySteps] = await Promise.all([
+    listExercisesBetween(user.id, startIso, endIso),
+    getDailySteps(user.id, today),
+  ]);
 
   const totalMinutes = exercises.reduce((sum, ex) => sum + ex.duration_minutes, 0);
   const totalCalories = exercises.reduce(
@@ -26,6 +31,8 @@ export default async function ExercisesPage() {
         <p className="page-eyebrow">今日の運動</p>
         <h1 className="page-title">運動</h1>
       </header>
+
+      <StepsForm initialSteps={dailySteps?.steps ?? null} />
 
       <div className="card">
         <div className="meal-section-header">

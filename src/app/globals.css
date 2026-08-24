@@ -545,6 +545,40 @@ a.history-item {
   font-size: 0.95rem;
 }
 
+/* --- 水分摂取 --- */
+
+.water-preset-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 12px 0;
+}
+
+.water-entry-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 12px;
+}
+
+.water-entry-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+.water-delete-btn {
+  border: none;
+  background: transparent;
+  color: var(--ink-soft);
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 2px 8px;
+}
+
 /* --- タブ --- */
 
 .tab-row {

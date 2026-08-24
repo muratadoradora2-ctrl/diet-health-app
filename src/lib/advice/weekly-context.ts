@@ -4,7 +4,7 @@ import { getActiveGoal } from "@/lib/data/goals";
 import { listBodyCompositionsBetween } from "@/lib/data/body-compositions";
 import { listMealsBetween } from "@/lib/data/meals";
 import { listExercisesBetween } from "@/lib/data/exercises";
-import { jstDateString, jstDayRangeToISOStrings } from "@/lib/date";
+import { daysBetweenDates, jstDateString, jstDayRangeToISOStrings } from "@/lib/date";
 import type { WeeklyReviewContext } from "@/lib/ai";
 
 export type WeeklyReviewContextResult = {
@@ -80,6 +80,13 @@ export async function buildWeeklyReviewContext(
       exercises.map((ex) => jstDateString(new Date(ex.performed_at))),
     ).size,
     totalExerciseMinutes: exercises.reduce((sum, ex) => sum + ex.duration_minutes, 0),
+    remainingWeightKg:
+      goal && weightEndKg !== null
+        ? Number((weightEndKg - goal.target_weight_kg).toFixed(2))
+        : null,
+    daysUntilTargetDate: goal?.target_date
+      ? daysBetweenDates(weekEndDate, goal.target_date)
+      : null,
   };
 
   const hashInput = JSON.stringify({

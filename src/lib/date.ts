@@ -75,6 +75,15 @@ export function jstMostRecentCompletedWeek(referenceDate: Date = new Date()): {
   return { startDate: toYmd(lastMonday), endDate: toYmd(lastSunday) };
 }
 
+/** date型(YYYY-MM-DD)文字列同士の日数差(endDate - startDate)を計算する */
+export function daysBetweenDates(startDate: string, endDate: string): number {
+  const [ay, am, ad] = startDate.split("-").map(Number);
+  const [by, bm, bd] = endDate.split("-").map(Number);
+  const a = new Date(ay, am - 1, ad);
+  const b = new Date(by, bm - 1, bd);
+  return Math.round((b.getTime() - a.getTime()) / (1000 * 60 * 60 * 24));
+}
+
 export function formatDateOnly(
   dateStr: string,
   options: Intl.DateTimeFormatOptions = { month: "numeric", day: "numeric" },

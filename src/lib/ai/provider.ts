@@ -102,6 +102,10 @@ export type WeeklyReviewContext = {
   /** その週のうち、運動を1件以上記録した日数(0〜7) */
   daysWithExerciseLog: number;
   totalExerciseMinutes: number;
+  /** 週末時点の体重と目標体重との差(kg)。正の値は目標より重い。goal未設定または体重未記録ならnull */
+  remainingWeightKg: number | null;
+  /** 週の最終日から目標日までの残り日数。目標日未設定ならnull(負の値は目標日超過) */
+  daysUntilTargetDate: number | null;
 };
 
 export type WeeklyReview = {
@@ -111,6 +115,10 @@ export type WeeklyReview = {
   goodPoints: string[];
   /** 来週に向けて(1〜3件) */
   focusNextWeek: string[];
+  /** 目標日までを見据えた、運動の種類・頻度・時間の目安の提案 */
+  exerciseSuggestion: string;
+  /** 目標に向けて食生活で気をつけるとよいこと */
+  dietTip: string;
 };
 
 export type WeeklyReviewResult = {

@@ -54,6 +54,12 @@ export async function ReviewCard() {
             ))}
           </ul>
 
+          <p className="review-subheading">運動の提案</p>
+          <p className="advice-detail">{review.exerciseSuggestion}</p>
+
+          <p className="review-subheading">食生活のポイント</p>
+          <p className="advice-detail">{review.dietTip}</p>
+
           <ReviewRefreshButton />
           <p className="ai-disclaimer">
             ※ このレビューはAIによる自動生成です。参考情報としてご利用ください。

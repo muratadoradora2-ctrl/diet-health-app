@@ -170,6 +170,16 @@ const WeeklyReviewSchema = z.object({
     .min(1)
     .max(3)
     .describe("来週に向けて意識するとよいこと。1〜3件、それぞれ1文程度"),
+  exerciseSuggestion: z
+    .string()
+    .describe(
+      "目標日までを見据えた、来週以降に取り組むとよい運動の種類・頻度・時間の目安。安全なペースの範囲で具体的に。目標が未設定の場合は、直近の運動習慣を踏まえた一般的な提案にする",
+    ),
+  dietTip: z
+    .string()
+    .describe(
+      "目標に向けて食生活で気をつけるとよいこと。1〜2文程度。極端な制限ではなく、続けやすい具体的な工夫を中心にする",
+    ),
 });
 
 /**
@@ -189,7 +199,14 @@ const WEEKLY_REVIEW_SYSTEM_PROMPT = `あなたは、夫婦2人のためのダイ
 - 記録が少ない、または体重が増えた週であっても、責めるような書き方をせず、
   次につながる前向きな振り返りにする。
 - 断定的な表現を避け、あくまで参考情報であることが伝わる書き方にする。
-- 提供された数値データの範囲内で助言し、存在しないデータを創作しない。`;
+- 提供された数値データの範囲内で助言し、存在しないデータを創作しない。
+- 目標(目標体重・目標日)が設定されている場合、目標までの残り体重と目標日までの
+  残り日数から、安全なペース(目安として体重の減少は週0.5kg程度までの緩やかな
+  範囲)に沿った運動の提案(種類・頻度・時間の目安)を具体的に行う。逆算すると
+  安全なペースでは目標日に間に合わない場合も、無理な運動量や過度な食事制限は
+  提案せず、ペースの見直しも選択肢であることを穏やかに伝える。
+- 食生活については、極端な制限ではなく、間食の内容・水分の摂り方・タンパク質の
+  摂取など、続けやすい具体的な工夫を1〜2文で伝える。`;
 
 function formatWeeklyContextForPrompt(context: WeeklyReviewContext): string {
   const lines: string[] = [];
@@ -225,6 +242,22 @@ function formatWeeklyContextForPrompt(context: WeeklyReviewContext): string {
   lines.push(
     `運動記録日数: ${context.daysWithExerciseLog}/7日(合計${context.totalExerciseMinutes}分)`,
   );
+
+  if (context.remainingWeightKg !== null) {
+    const abs = Math.abs(context.remainingWeightKg);
+    lines.push(
+      context.remainingWeightKg > 0
+        ? `目標までの残り: 約${abs}kgの減量が必要`
+        : `目標までの残り: 既に目標体重に到達済み(${abs}kg超過側)`,
+    );
+  }
+  if (context.daysUntilTargetDate !== null) {
+    lines.push(
+      context.daysUntilTargetDate >= 0
+        ? `目標日までの残り日数: ${context.daysUntilTargetDate}日`
+        : `目標日: ${Math.abs(context.daysUntilTargetDate)}日超過`,
+    );
+  }
 
   return lines.join("\n");
 }

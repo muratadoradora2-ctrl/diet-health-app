@@ -1,18 +1,34 @@
 import "server-only";
 import { getAIProvider } from "@/lib/ai";
-import { getWeeklyReview, saveWeeklyReview } from "@/lib/data/weekly-reviews";
+import { getWeeklyReview, saveWeeklyReview, type WeeklyReviewRow } from "@/lib/data/weekly-reviews";
 import { buildWeeklyReviewContext } from "./weekly-context";
 import { jstMostRecentCompletedWeek } from "@/lib/date";
 import { checkRateLimit } from "@/lib/rate-limit";
+import type { WeeklyReview } from "@/lib/ai";
 
 export type WeeklyReviewView = {
   summary: string;
   goodPoints: string[];
   focusNextWeek: string[];
+  exerciseSuggestion: string;
+  dietTip: string;
   modelUsed: string;
   weekStartDate: string;
   weekEndDate: string;
 };
+
+function toView(
+  review: WeeklyReview,
+  modelUsed: string,
+  weekStartDate: string,
+  weekEndDate: string,
+): WeeklyReviewView {
+  return { ...review, modelUsed, weekStartDate, weekEndDate };
+}
+
+function rowToView(row: WeeklyReviewRow): WeeklyReviewView {
+  return toView(row.content, row.model_used, row.week_start_date, row.week_end_date);
+}
 
 /**
  * 直近の「完了した週」(月〜日)のAIレビューを取得する。
@@ -40,14 +56,7 @@ export async function getOrGenerateWeeklyReview(
 
   const cached = await getWeeklyReview(userId, startDate);
   if (cached && !forceRegenerate && cached.input_data_hash === inputDataHash) {
-    return {
-      summary: cached.content.summary,
-      goodPoints: cached.content.goodPoints,
-      focusNextWeek: cached.content.focusNextWeek,
-      modelUsed: cached.model_used,
-      weekStartDate: cached.week_start_date,
-      weekEndDate: cached.week_end_date,
-    };
+    return rowToView(cached);
   }
 
   if (!forceRegenerate) {
@@ -59,17 +68,7 @@ export async function getOrGenerateWeeklyReview(
       windowSeconds: 60 * 60 * 24,
     });
     if (!rateLimit.success) {
-      if (cached) {
-        return {
-          summary: cached.content.summary,
-          goodPoints: cached.content.goodPoints,
-          focusNextWeek: cached.content.focusNextWeek,
-          modelUsed: cached.model_used,
-          weekStartDate: cached.week_start_date,
-          weekEndDate: cached.week_end_date,
-        };
-      }
-      return null;
+      return cached ? rowToView(cached) : null;
     }
   }
 
@@ -78,12 +77,5 @@ export async function getOrGenerateWeeklyReview(
 
   await saveWeeklyReview(userId, startDate, endDate, review, inputDataHash, modelUsed);
 
-  return {
-    summary: review.summary,
-    goodPoints: review.goodPoints,
-    focusNextWeek: review.focusNextWeek,
-    modelUsed,
-    weekStartDate: startDate,
-    weekEndDate: endDate,
-  };
+  return toView(review, modelUsed, startDate, endDate);
 }

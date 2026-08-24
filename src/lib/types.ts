@@ -65,6 +65,22 @@ export type Exercise = {
   updated_at: string;
 };
 
+export type DailySteps = {
+  id: string;
+  user_id: string;
+  log_date: string;
+  steps: number;
+  updated_at: string;
+};
+
+export type WaterIntake = {
+  id: string;
+  user_id: string;
+  logged_at: string;
+  volume_ml: number;
+  updated_at: string;
+};
+
 export type MenstrualCycle = {
   id: string;
   user_id: string;
