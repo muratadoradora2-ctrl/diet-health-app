@@ -11,6 +11,10 @@ export const EXERCISE_TYPES = [
   { key: "cycling", label: "サイクリング", met: 6.0 },
   { key: "swimming", label: "水泳", met: 6.0 },
   { key: "strength", label: "筋力トレーニング", met: 5.0 },
+  { key: "squat", label: "スクワット", met: 5.0 },
+  { key: "situp", label: "腹筋", met: 3.8 },
+  { key: "plank", label: "プランク", met: 3.0 },
+  { key: "radiotaiso", label: "ラジオ体操", met: 4.0 },
   { key: "yoga", label: "ヨガ・ストレッチ", met: 2.5 },
   { key: "other", label: "その他", met: 4.0 },
 ] as const;
