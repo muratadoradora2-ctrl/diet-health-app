@@ -1,17 +1,17 @@
 /*
- * Phase 1設計書のカラーパレット・タイポグラフィを反映したデザイントークン。
+ * クリーム・ピンク・ブラウンを基調としたデザイントークン。
  */
 :root {
-  --bg: #f6f4ef;
-  --surface: #ffffff;
-  --surface-2: #efebe1;
-  --ink: #2e2c27;
-  --ink-soft: #6b675e;
-  --line: #e2ddd0;
-  --accent: #6c8060;
-  --accent-strong: #4c5c42;
-  --accent-tint: #e7ebe0;
-  --danger: #b3543a;
+  --bg: #fbf3ea;
+  --surface: #fffbf7;
+  --surface-2: #f3e1d3;
+  --ink: #4a3226;
+  --ink-soft: #8c7364;
+  --line: #e8d6c7;
+  --accent: #c06673;
+  --accent-strong: #8b4a4f;
+  --accent-tint: #f6dee0;
+  --danger: #a6483d;
   --font-display: "Zen Old Mincho", "Hiragino Mincho ProN", "Noto Serif JP", serif;
   --font-body:
     "Zen Kaku Gothic New", -apple-system, BlinkMacSystemFont, "Hiragino Sans",
@@ -20,16 +20,16 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #1e1d19;
-    --surface: #26241f;
-    --surface-2: #302e27;
-    --ink: #ece8de;
-    --ink-soft: #b3ad9f;
-    --line: #3c392f;
-    --accent: #9db08c;
-    --accent-strong: #c4d4b4;
-    --accent-tint: #333b2c;
-    --danger: #d79a73;
+    --bg: #241813;
+    --surface: #2f211a;
+    --surface-2: #3b2a22;
+    --ink: #f3e4d7;
+    --ink-soft: #c4a594;
+    --line: #4a362c;
+    --accent: #e39ca6;
+    --accent-strong: #f0b4bc;
+    --accent-tint: #4a2f30;
+    --danger: #e08a76;
   }
 }
 

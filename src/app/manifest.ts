@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "夫婦2人専用のダイエット・体調管理アプリ",
     start_url: "/",
     display: "standalone",
-    background_color: "#f6f4ef",
-    theme_color: "#6c8060",
+    background_color: "#fbf3ea",
+    theme_color: "#c06673",
     icons: [
       {
         src: "/icon-192.png",

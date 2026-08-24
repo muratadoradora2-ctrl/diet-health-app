@@ -18,7 +18,7 @@ export function AppIconMark({ size }: { size: number }) {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "#7a9068",
+        background: "#c06673",
       }}
     >
       <div
@@ -46,7 +46,7 @@ export function AppIconMark({ size }: { size: number }) {
               width: eyeSize,
               height: eyeSize,
               borderRadius: "50%",
-              background: "#4a4537",
+              background: "#4a3226",
             }}
           />
           <div
@@ -54,7 +54,7 @@ export function AppIconMark({ size }: { size: number }) {
               width: eyeSize,
               height: eyeSize,
               borderRadius: "50%",
-              background: "#4a4537",
+              background: "#4a3226",
             }}
           />
         </div>
@@ -64,9 +64,9 @@ export function AppIconMark({ size }: { size: number }) {
             height: mouthHeight,
             borderBottomLeftRadius: mouthWidth,
             borderBottomRightRadius: mouthWidth,
-            borderLeft: `${borderWidth}px solid #4a4537`,
-            borderRight: `${borderWidth}px solid #4a4537`,
-            borderBottom: `${borderWidth}px solid #4a4537`,
+            borderLeft: `${borderWidth}px solid #4a3226`,
+            borderRight: `${borderWidth}px solid #4a3226`,
+            borderBottom: `${borderWidth}px solid #4a3226`,
           }}
         />
         <div
