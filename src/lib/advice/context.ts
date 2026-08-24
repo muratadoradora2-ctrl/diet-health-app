@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { getActiveGoal } from "@/lib/data/goals";
 import { listBodyCompositions } from "@/lib/data/body-compositions";
 import { listMealsBetween } from "@/lib/data/meals";
+import { listExercisesBetween } from "@/lib/data/exercises";
 import { computeDashboardMetrics } from "@/lib/metrics";
 import { jstDateString, jstDayRangeToISOStrings } from "@/lib/date";
 import type { DailyAdviceContext } from "@/lib/ai";
@@ -40,10 +41,11 @@ export async function buildDailyAdviceContext(
   const todayStr = jstDateString();
   const { startIso, endIso } = jstDayRangeToISOStrings(todayStr);
 
-  const [goal, entries, todaysMeals] = await Promise.all([
+  const [goal, entries, todaysMeals, todaysExercises] = await Promise.all([
     getActiveGoal(userId),
     listBodyCompositions(userId, since.toISOString()),
     listMealsBetween(userId, startIso, endIso),
+    listExercisesBetween(userId, startIso, endIso),
   ]);
 
   const metrics = computeDashboardMetrics(entries, goal);
@@ -71,6 +73,11 @@ export async function buildDailyAdviceContext(
       text: meal.input_text,
       caloriesKcal: meal.estimated_calories_kcal,
     })),
+    todaysExerciseMinutes: todaysExercises.reduce((sum, ex) => sum + ex.duration_minutes, 0),
+    todaysExerciseCaloriesKcal:
+      todaysExercises.length > 0
+        ? todaysExercises.reduce((sum, ex) => sum + (ex.estimated_calories_kcal ?? 0), 0)
+        : null,
   };
 
   const hashInput = JSON.stringify({
@@ -78,6 +85,9 @@ export async function buildDailyAdviceContext(
     goal: goal ? { id: goal.id, updatedAt: goal.updated_at } : null,
     meals: todaysMeals
       .map((meal) => ({ id: meal.id, updatedAt: meal.updated_at }))
+      .sort((a, b) => a.id.localeCompare(b.id)),
+    exercises: todaysExercises
+      .map((ex) => ({ id: ex.id, updatedAt: ex.updated_at }))
       .sort((a, b) => a.id.localeCompare(b.id)),
   });
   const inputDataHash = createHash("sha256").update(hashInput).digest("hex");

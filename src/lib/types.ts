@@ -54,6 +54,17 @@ export type Profile = {
   menstrual_tracking_enabled: boolean;
 };
 
+export type Exercise = {
+  id: string;
+  user_id: string;
+  performed_at: string;
+  exercise_type: string;
+  duration_minutes: number;
+  estimated_calories_kcal: number | null;
+  memo: string | null;
+  updated_at: string;
+};
+
 export type MenstrualCycle = {
   id: string;
   user_id: string;

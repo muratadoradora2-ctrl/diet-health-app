@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { getActiveGoal } from "@/lib/data/goals";
 import { listBodyCompositionsBetween } from "@/lib/data/body-compositions";
 import { listMealsBetween } from "@/lib/data/meals";
+import { listExercisesBetween } from "@/lib/data/exercises";
 import { jstDateString, jstDayRangeToISOStrings } from "@/lib/date";
 import type { WeeklyReviewContext } from "@/lib/ai";
 
@@ -24,10 +25,11 @@ export async function buildWeeklyReviewContext(
   const { startIso } = jstDayRangeToISOStrings(weekStartDate);
   const { endIso } = jstDayRangeToISOStrings(weekEndDate);
 
-  const [goal, entries, meals] = await Promise.all([
+  const [goal, entries, meals, exercises] = await Promise.all([
     getActiveGoal(userId),
     listBodyCompositionsBetween(userId, startIso, endIso),
     listMealsBetween(userId, startIso, endIso),
+    listExercisesBetween(userId, startIso, endIso),
   ]);
 
   const daysWithBodyCompLog = new Set(
@@ -74,12 +76,19 @@ export async function buildWeeklyReviewContext(
     avgCaloriesKcal,
     daysWithMealLog,
     totalMealsLogged: meals.length,
+    daysWithExerciseLog: new Set(
+      exercises.map((ex) => jstDateString(new Date(ex.performed_at))),
+    ).size,
+    totalExerciseMinutes: exercises.reduce((sum, ex) => sum + ex.duration_minutes, 0),
   };
 
   const hashInput = JSON.stringify({
     entries: entries.map((entry) => ({ id: entry.id, measuredAt: entry.measured_at })),
     meals: meals
       .map((meal) => ({ id: meal.id, updatedAt: meal.updated_at }))
+      .sort((a, b) => a.id.localeCompare(b.id)),
+    exercises: exercises
+      .map((ex) => ({ id: ex.id, updatedAt: ex.updated_at }))
       .sort((a, b) => a.id.localeCompare(b.id)),
     goal: goal ? { id: goal.id, updatedAt: goal.updated_at } : null,
   });

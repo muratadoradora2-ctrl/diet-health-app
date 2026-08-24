@@ -7,6 +7,7 @@ const ITEMS = [
   { href: "/home", label: "ホーム" },
   { href: "/body-compositions", label: "記録" },
   { href: "/meals", label: "食事" },
+  { href: "/exercises", label: "運動" },
   { href: "/graphs", label: "グラフ" },
   { href: "/more", label: "その他" },
 ] as const;

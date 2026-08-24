@@ -144,6 +144,17 @@ function formatContextForPrompt(context: DailyAdviceContext): string {
     lines.push("本日記録済みの食事: なし");
   }
 
+  if (context.todaysExerciseMinutes > 0) {
+    lines.push(
+      `本日の運動: 合計${context.todaysExerciseMinutes}分` +
+        (context.todaysExerciseCaloriesKcal !== null
+          ? `(推定消費 約${context.todaysExerciseCaloriesKcal}kcal)`
+          : ""),
+    );
+  } else {
+    lines.push("本日の運動記録: なし");
+  }
+
   return lines.join("\n");
 }
 
@@ -210,6 +221,10 @@ function formatWeeklyContextForPrompt(context: WeeklyReviewContext): string {
   if (context.avgCaloriesKcal !== null) {
     lines.push(`食事記録日の平均カロリー: 約${context.avgCaloriesKcal}kcal/日`);
   }
+
+  lines.push(
+    `運動記録日数: ${context.daysWithExerciseLog}/7日(合計${context.totalExerciseMinutes}分)`,
+  );
 
   return lines.join("\n");
 }

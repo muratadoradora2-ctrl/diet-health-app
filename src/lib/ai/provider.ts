@@ -61,6 +61,10 @@ export type DailyAdviceContext = {
     text: string | null;
     caloriesKcal: number | null;
   }[];
+  /** 本日の運動時間合計(分) */
+  todaysExerciseMinutes: number;
+  /** 本日の運動による推定消費カロリー合計(kcal)。記録が無い場合はnull */
+  todaysExerciseCaloriesKcal: number | null;
 };
 
 export type DailyAdvice = {
@@ -95,6 +99,9 @@ export type WeeklyReviewContext = {
   /** その週のうち、食事を1件以上記録した日数(0〜7) */
   daysWithMealLog: number;
   totalMealsLogged: number;
+  /** その週のうち、運動を1件以上記録した日数(0〜7) */
+  daysWithExerciseLog: number;
+  totalExerciseMinutes: number;
 };
 
 export type WeeklyReview = {
