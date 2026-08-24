@@ -6,6 +6,7 @@ import { listBodyCompositions } from "@/lib/data/body-compositions";
 import { computeDashboardMetrics } from "@/lib/metrics";
 import { formatDateOnly, formatJstDateTime } from "@/lib/date";
 import { AdviceCard, AdviceCardSkeleton } from "./advice-card";
+import { ToggleReveal } from "@/components/toggle-reveal";
 
 function formatKg(value: number | null | undefined) {
   if (value === null || value === undefined) return "—";
@@ -59,101 +60,103 @@ export default async function HomePage() {
         </div>
       ) : (
         <>
-          <div className="card hero-card">
-            <div className="hero-stat">
-              <span className="hero-value">{formatKg(latest.weight_kg)}</span>
-              <span className="hero-unit">kg</span>
-            </div>
-            <p className="hero-date">
-              測定{" "}
-              {formatJstDateTime(latest.measured_at, {
-                month: "numeric",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </p>
-            <div className="stat-row">
-              <div>
-                <p className="stat-label">体脂肪率</p>
-                <p className="stat-value">
-                  {formatPercent(latest.body_fat_percent)}
-                  <span className="stat-unit"> %</span>
-                </p>
+          <ToggleReveal label="体重・目標の進捗">
+            <div className="card hero-card">
+              <div className="hero-stat">
+                <span className="hero-value">{formatKg(latest.weight_kg)}</span>
+                <span className="hero-unit">kg</span>
               </div>
-              <div>
-                <p className="stat-label">筋肉量</p>
-                <p className="stat-value">
-                  {formatKg(latest.muscle_mass_kg)}
-                  <span className="stat-unit"> kg</span>
-                </p>
-              </div>
-            </div>
-            <Link href="/body-compositions/new" className="button-secondary">
-              今日の体組成を登録
-            </Link>
-          </div>
-
-          {goal ? (
-            <div className="card">
-              <h2 className="card-title">目標までの進捗</h2>
-              <div className="goal-flow">
-                <div>
-                  <p className="stat-label">開始時</p>
-                  <p className="stat-value-sm">{formatKg(goal.start_weight_kg)}kg</p>
-                </div>
-                <span className="goal-arrow">→</span>
-                <div>
-                  <p className="stat-label">現在</p>
-                  <p className="stat-value-sm">{formatKg(latest.weight_kg)}kg</p>
-                </div>
-                <span className="goal-arrow">→</span>
-                <div>
-                  <p className="stat-label">目標</p>
-                  <p className="stat-value-sm">{formatKg(goal.target_weight_kg)}kg</p>
-                </div>
-              </div>
-
-              {metrics.achievementPercent !== null && (
-                <div className="progress-track">
-                  <div
-                    className="progress-fill"
-                    style={{ width: `${metrics.achievementPercent}%` }}
-                  />
-                </div>
-              )}
-
+              <p className="hero-date">
+                測定{" "}
+                {formatJstDateTime(latest.measured_at, {
+                  month: "numeric",
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </p>
               <div className="stat-row">
                 <div>
-                  <p className="stat-label">開始からの変化</p>
-                  <p className="stat-value-sm">{formatSignedKg(metrics.changeFromStart)}</p>
-                </div>
-                <div>
-                  <p className="stat-label">目標まで</p>
-                  <p className="stat-value-sm">
-                    {metrics.remainingToTarget === null
-                      ? "—"
-                      : metrics.remainingToTarget <= 0
-                        ? "達成しました"
-                        : `あと ${metrics.remainingToTarget.toFixed(1)} kg`}
+                  <p className="stat-label">体脂肪率</p>
+                  <p className="stat-value">
+                    {formatPercent(latest.body_fat_percent)}
+                    <span className="stat-unit"> %</span>
                   </p>
                 </div>
-                {goal.target_date && (
-                  <div>
-                    <p className="stat-label">目標日</p>
-                    <p className="stat-value-sm">{formatDateOnly(goal.target_date)}</p>
-                  </div>
-                )}
+                <div>
+                  <p className="stat-label">筋肉量</p>
+                  <p className="stat-value">
+                    {formatKg(latest.muscle_mass_kg)}
+                    <span className="stat-unit"> kg</span>
+                  </p>
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="card stack">
-              <p>目標を設定すると、進捗を確認できるようになります。</p>
-              <Link href="/goals" className="button-secondary">
-                目標を設定する
+              <Link href="/body-compositions/new" className="button-secondary">
+                今日の体組成を登録
               </Link>
             </div>
-          )}
+
+            {goal ? (
+              <div className="card">
+                <h2 className="card-title">目標までの進捗</h2>
+                <div className="goal-flow">
+                  <div>
+                    <p className="stat-label">開始時</p>
+                    <p className="stat-value-sm">{formatKg(goal.start_weight_kg)}kg</p>
+                  </div>
+                  <span className="goal-arrow">→</span>
+                  <div>
+                    <p className="stat-label">現在</p>
+                    <p className="stat-value-sm">{formatKg(latest.weight_kg)}kg</p>
+                  </div>
+                  <span className="goal-arrow">→</span>
+                  <div>
+                    <p className="stat-label">目標</p>
+                    <p className="stat-value-sm">{formatKg(goal.target_weight_kg)}kg</p>
+                  </div>
+                </div>
+
+                {metrics.achievementPercent !== null && (
+                  <div className="progress-track">
+                    <div
+                      className="progress-fill"
+                      style={{ width: `${metrics.achievementPercent}%` }}
+                    />
+                  </div>
+                )}
+
+                <div className="stat-row">
+                  <div>
+                    <p className="stat-label">開始からの変化</p>
+                    <p className="stat-value-sm">{formatSignedKg(metrics.changeFromStart)}</p>
+                  </div>
+                  <div>
+                    <p className="stat-label">目標まで</p>
+                    <p className="stat-value-sm">
+                      {metrics.remainingToTarget === null
+                        ? "—"
+                        : metrics.remainingToTarget <= 0
+                          ? "達成しました"
+                          : `あと ${metrics.remainingToTarget.toFixed(1)} kg`}
+                    </p>
+                  </div>
+                  {goal.target_date && (
+                    <div>
+                      <p className="stat-label">目標日</p>
+                      <p className="stat-value-sm">{formatDateOnly(goal.target_date)}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="card stack">
+                <p>目標を設定すると、進捗を確認できるようになります。</p>
+                <Link href="/goals" className="button-secondary">
+                  目標を設定する
+                </Link>
+              </div>
+            )}
+          </ToggleReveal>
 
           <Suspense fallback={<AdviceCardSkeleton />}>
             <AdviceCard />
