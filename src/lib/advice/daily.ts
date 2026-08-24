@@ -3,6 +3,7 @@ import { getAIProvider } from "@/lib/ai";
 import { getDailyAdvice, saveDailyAdvice } from "@/lib/data/daily-advice";
 import { buildDailyAdviceContext } from "./context";
 import { jstDateString } from "@/lib/date";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export type DailyAdviceView = {
   points: string[];
@@ -40,6 +41,29 @@ export async function getOrGenerateDailyAdvice(
       modelUsed: cached.model_used,
       adviceDate: cached.advice_date,
     };
+  }
+
+  if (!forceRegenerate) {
+    // 自動生成経路(ホーム画面表示のたびにハッシュ不一致で再生成され得る)にも
+    // 上限を設ける。手動更新(forceRegenerate)は呼び出し元(refreshDailyAdvice)
+    // が既にレート制限を確認済みのため、ここでは二重にカウントしない。
+    const rateLimit = await checkRateLimit(userId, "daily-advice", {
+      limit: 20,
+      windowSeconds: 60 * 60 * 24,
+    });
+    if (!rateLimit.success) {
+      // 上限到達時は、古くてもキャッシュがあればそれを返し、無ければ
+      // 何も表示しない(ページ全体を壊さない)。
+      if (cached) {
+        return {
+          points: cached.content.points,
+          detail: cached.content.detail,
+          modelUsed: cached.model_used,
+          adviceDate: cached.advice_date,
+        };
+      }
+      return null;
+    }
   }
 
   const provider = getAIProvider();
